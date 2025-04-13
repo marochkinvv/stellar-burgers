@@ -76,7 +76,6 @@ export const getIngredientsApi = () =>
     .then((res) => checkResponse<TIngredientsResponse>(res))
     .then((data) => {
       if (data?.success) {
-        console.log(data.data);
         return data.data;
       }
       return Promise.reject(data);

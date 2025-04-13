@@ -1,31 +1,42 @@
-import { FC, SyntheticEvent, useState } from 'react';
+import { FC, SyntheticEvent, useCallback, useEffect, useState } from 'react';
 import { LoginUI } from '@ui-pages';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   errorUser,
-  getUser,
-  isAuthSelector,
+  getUserSelector,
+  isLoadingSelector,
   loginUser
 } from '../../slices/userSlice';
 import { AppDispatch } from '../../services/store';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Preloader } from '@ui';
 
 export const Login: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const isAuthenticated = useSelector(isAuthSelector);
+  const navigate = useNavigate();
   const error = useSelector(errorUser);
-  const localStorageEmail = localStorage.getItem('email') ?? '';
-  const [email, setEmail] = useState(localStorageEmail);
+  const userData = useSelector(getUserSelector);
+  const loading = useSelector(isLoadingSelector);
+  const [email, setEmail] = useState(userData.email);
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e: SyntheticEvent) => {
-    e.preventDefault();
-    localStorage.setItem('email', email);
-    dispatch(loginUser({ email: email, password: password }));
-  };
+  const handleSubmit = useCallback(
+    (e: SyntheticEvent) => {
+      e.preventDefault();
+      dispatch(loginUser({ email, password }))
+        .unwrap()
+        .then(() => {
+          navigate('/', { replace: true });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    [email, password, navigate, dispatch]
+  );
 
-  if (isAuthenticated) {
-    return <Navigate to={'/'} />;
+  if (loading) {
+    return <Preloader />;
   }
 
   return (
