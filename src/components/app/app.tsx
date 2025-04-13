@@ -15,8 +15,6 @@ import { AppHeader, Modal, OrderInfo, IngredientDetails } from '@components';
 import { ProtectedRoute } from '../protected-route/protected-route';
 import { FC, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '../../services/store';
 import {
   getUser,
   isAuthSelector,
@@ -24,12 +22,13 @@ import {
 } from '../../slices/userSlice';
 import { getIngredients } from '../../slices/ingredientsSlice';
 import { getCookie } from '../../utils/cookie';
+import { useDispatch, useSelector } from '../../services/store';
 
 export const App: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const backgroundLocation = location.state?.background;
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const isAuth = useSelector(isAuthSelector);
   const isLoading = useSelector(isLoadingSelector);
   const hasFetchedUser = useRef(false);
@@ -132,9 +131,11 @@ export const App: FC = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title={'Заказ'} onClose={() => navigate(-1)}>
-                <OrderInfo />
-              </Modal>
+              <ProtectedRoute onlyAuth>
+                <Modal title={'Заказ'} onClose={() => navigate(-1)}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
             }
           />
           <Route

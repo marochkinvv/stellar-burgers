@@ -1,18 +1,17 @@
-import { FC, SyntheticEvent, useCallback, useEffect, useState } from 'react';
+import { FC, SyntheticEvent, useCallback, useState } from 'react';
 import { LoginUI } from '@ui-pages';
-import { useDispatch, useSelector } from 'react-redux';
 import {
   errorUser,
   getUserSelector,
   isLoadingSelector,
   loginUser
 } from '../../slices/userSlice';
-import { AppDispatch } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { useNavigate } from 'react-router-dom';
 import { Preloader } from '@ui';
 
 export const Login: FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const error = useSelector(errorUser);
   const userData = useSelector(getUserSelector);

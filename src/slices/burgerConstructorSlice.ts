@@ -1,6 +1,11 @@
 import { orderBurgerApi } from '@api';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { TConstructorIngredient } from '@utils-types';
+import {
+  createAsyncThunk,
+  createSlice,
+  nanoid,
+  PayloadAction
+} from '@reduxjs/toolkit';
+import { TConstructorIngredient, TIngredient } from '@utils-types';
 
 interface BurgerConstructorState {
   bun: TConstructorIngredient | null;
@@ -36,16 +41,21 @@ export const burgerConstructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
   reducers: {
-    addIngredient(state, action) {
-      const ingredientId = action.payload._id;
-      if (action.payload.type !== 'bun') {
-        state.ingredients.push(action.payload);
-        state.ingredientCounts[ingredientId] =
-          (state.ingredientCounts[ingredientId] || 0) + 1;
-      } else {
-        state.bun = action.payload;
-      }
-      updateList(state);
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        const ingredientId = action.payload._id;
+        if (action.payload.type !== 'bun') {
+          state.ingredients.push(action.payload);
+          state.ingredientCounts[ingredientId] =
+            (state.ingredientCounts[ingredientId] || 0) + 1;
+        } else {
+          state.bun = action.payload;
+        }
+        updateList(state);
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: { ...ingredient, id: nanoid() }
+      })
     },
     moveUpIngredient(state, action) {
       const index = action.payload;
@@ -63,18 +73,16 @@ export const burgerConstructorSlice = createSlice({
         state.ingredients.splice(index + 1, 0, ingredientToMove);
       }
     },
-    removeIngredient(state, action) {
-      const index = action.payload;
-      if (index !== -1) {
-        const ingredientId = state.ingredients[index]._id;
-        state.ingredients.splice(index, 1);
-        if (state.ingredientCounts[ingredientId]) {
-          state.ingredientCounts[ingredientId] -= 1;
-          if (state.ingredientCounts[ingredientId] === 0) {
-            delete state.ingredientCounts[ingredientId];
-          }
-        }
+    removeIngredient(state, action: PayloadAction<TConstructorIngredient>) {
+      const ingredientId = action.payload._id;
+      state.ingredients = state.ingredients.filter(
+        (ing) => ing.id !== action.payload.id
+      );
+      state.ingredientCounts[ingredientId] -= 1;
+      if (state.ingredientCounts[ingredientId] === 0) {
+        delete state.ingredientCounts[ingredientId];
       }
+      updateList(state);
     },
     getConstructor(state) {
       const bunId = state.bun?._id;

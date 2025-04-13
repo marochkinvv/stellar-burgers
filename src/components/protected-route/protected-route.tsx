@@ -1,4 +1,3 @@
-import { useSelector, useDispatch } from 'react-redux';
 import {
   isAuthSelector,
   isLoadingSelector,
@@ -9,7 +8,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { Preloader } from '@ui';
 import { useEffect } from 'react';
 import { getCookie } from '../../utils/cookie';
-import { AppDispatch } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 
 type ProtectedRouteProps = {
   onlyUnAuth?: boolean;
@@ -22,7 +21,7 @@ export const ProtectedRoute = ({
   onlyAuth,
   children
 }: ProtectedRouteProps) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch();
   const isAuth = useSelector(isAuthSelector);
   const user = useSelector(getUserSelector);
   const isLoading = useSelector(isLoadingSelector);
